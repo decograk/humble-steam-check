@@ -1,4 +1,4 @@
-# 🎮 Humble Steam Check
+# <img src="icons/icon-32.png" width="24" height="24" alt="icon"> Humble Steam Check
 
 A Firefox extension that shows which games on Humble Bundle pages are already in your Steam library.
 
