@@ -72,7 +72,9 @@ humble-steam-check/
 
 ## Contributing
 
-PRs welcome. If you find a game that doesn't match correctly, open an issue with the Humble Bundle page URL and your Steam game name.
+Found a bug or a game that doesn't match correctly? [Open an issue on GitHub](https://github.com/decograk/humble-steam-check/issues) with the Humble Bundle page URL and your Steam game name.
+
+Pull requests are welcome on [GitHub](https://github.com/decograk/humble-steam-check). The primary repo is hosted on [git.deco.sh](https://git.deco.sh/signal-works/humble-steam-check); GitHub is a mirror for community contributions.
 
 ## License
 
