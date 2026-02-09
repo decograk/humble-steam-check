@@ -38,8 +38,10 @@ When you browse a Humble Bundle page, the extension marks each game with a badge
 3. Click **"Load Temporary Add-on"**
 4. Select `manifest.json` from this directory
 
-### Firefox Add-ons (coming soon)
-Submission to AMO planned for v1.0.
+### Firefox Add-ons
+[![AMO](https://img.shields.io/badge/Firefox-Install%20from%20AMO-orange)](https://addons.mozilla.org/en-US/firefox/addon/humble-steam-check/)
+
+Install from [addons.mozilla.org](https://addons.mozilla.org/en-US/firefox/addon/humble-steam-check/).
 
 ## Important Notes
 
