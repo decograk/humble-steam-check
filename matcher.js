@@ -24,7 +24,7 @@ var __humbleSteamCheck = (() => {
    */
   function stripEdition(name) {
     return name
-      .replace(/\b(edition|deluxe|goty|game of the year|complete|definitive|remastered|enhanced|reloaded|ultimate|gold|premium|standard|special|directors cut|collection)\b/gi, "")
+      .replace(/\b(edition|deluxe|goty|game of the year|complete|definitive|remastered|enhanced|reloaded|ultimate|gold|premium|platinum|standard|special|directors cut|collection|anthology|bundle|pack)\b/gi, "")
       .replace(/\s+/g, " ")
       .trim();
   }
@@ -76,11 +76,23 @@ var __humbleSteamCheck = (() => {
       return false;
     }
 
-    // Reject if one string is a prefix of the other with just a short suffix
+    // Reject if one string is a prefix of the other (different sequel/variant)
     const shorter = a.length <= b.length ? a : b;
     const longer = a.length <= b.length ? b : a;
-    if (longer.startsWith(shorter) && longer.length - shorter.length <= 3) {
+    if (longer.startsWith(shorter + " ") || (longer.startsWith(shorter) && longer.length - shorter.length <= 3)) {
       return false;
+    }
+    // Also reject if they share a long common prefix but diverge (e.g. "x tycoon 3" vs "x tycoon world")
+    const aWords = a.split(" ");
+    const bWords = b.split(" ");
+    let common = 0;
+    while (common < aWords.length && common < bWords.length && aWords[common] === bWords[common]) common++;
+    if (common > 0 && common < aWords.length && common < bWords.length) {
+      // They diverge — if the shared prefix is most of both strings, the differing part matters
+      const commonStr = aWords.slice(0, common).join(" ");
+      if (commonStr.length / a.length > 0.6 && commonStr.length / b.length > 0.6) {
+        return false;
+      }
     }
 
     return true;
@@ -151,11 +163,16 @@ var __humbleSteamCheck = (() => {
 
     // Strategy 3: DLC/edition — check if the base game is owned
     // Check if any owned game name is a prefix of this item
+    // But NOT if the suffix is just an edition/remaster word (those are different products)
+    const EDITION_SUFFIXES = /^(edition|deluxe|goty|game of the year|complete|definitive|remastered|remaster|enhanced|reloaded|ultimate|gold|premium|platinum|standard|special|directors cut|collection|anthology|bundle|pack|classic|hd|4k)(\s|$)/i;
     const baseName = extractBaseName(normalizedHumble);
     for (const game of ownedGames) {
       const normalizedOwned = normalizeName(game.name);
       // Direct prefix: "just cause 4" is prefix of "just cause 4 neon racer pack"
       if (normalizedHumble.startsWith(normalizedOwned + " ")) {
+        const suffix = normalizedHumble.slice(normalizedOwned.length + 1);
+        // If suffix is just an edition word, skip — it's a different product
+        if (EDITION_SUFFIXES.test(suffix)) continue;
         return { status: "base_owned", match: game };
       }
       // Also check extracted base name
