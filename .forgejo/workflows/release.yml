@@ -47,24 +47,41 @@ jobs:
 
           cd chrome-build && zip -r "../dist/humble-steam-check-${{ steps.version.outputs.version }}-chrome.zip" . && cd ..
 
-      - name: Write release notes
-        run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          cat > dist/release-notes.md << 'NOTES'
-          ## Installation
-
-          ### Firefox
-          Download the firefox zip and install from AMO or load temporarily via about:debugging
-
-          ### Chrome
-          Download the chrome zip, unzip, open chrome://extensions, enable Developer Mode, click Load unpacked and select the folder
-          NOTES
-
       - name: Create Forgejo Release
-        uses: actions/forgejo-release@v2
-        with:
-          direction: upload
-          token: ${{ secrets.GITHUB_TOKEN }}
-          release-dir: dist
-          release-notes-file: dist/release-notes.md
-          title: "Humble Steam Check v${{ steps.version.outputs.version }}"
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          FORGEJO="https://git.deco.sh"
+          REPO="signal-works/humble-steam-check"
+          TAG="v${VERSION}"
+
+          # Create release
+          RELEASE_JSON=$(curl -s -X POST \
+            -H "Authorization: token ${TOKEN}" \
+            -H "Content-Type: application/json" \
+            "${FORGEJO}/api/v1/repos/${REPO}/releases" \
+            -d "{\"tag_name\":\"${TAG}\",\"name\":\"Humble Steam Check v${VERSION}\",\"body\":\"## Installation\\n\\n### Firefox\\nDownload the firefox zip and install from AMO or load temporarily via about:debugging\\n\\n### Chrome\\nDownload the chrome zip, unzip, open chrome://extensions, enable Developer Mode, click Load unpacked and select the folder\"}")
+
+          RELEASE_ID=$(echo "$RELEASE_JSON" | jq -r '.id')
+          echo "Release ID: $RELEASE_ID"
+
+          if [ "$RELEASE_ID" = "null" ] || [ -z "$RELEASE_ID" ]; then
+            echo "Failed to create release:"
+            echo "$RELEASE_JSON"
+            exit 1
+          fi
+
+          # Upload assets
+          for file in dist/*.zip; do
+            filename=$(basename "$file")
+            echo "Uploading $filename..."
+            curl -s -X POST \
+              -H "Authorization: token ${TOKEN}" \
+              -H "Content-Type: application/octet-stream" \
+              "${FORGEJO}/api/v1/repos/${REPO}/releases/${RELEASE_ID}/assets?name=${filename}" \
+              --data-binary "@${file}"
+            echo ""
+          done
+
+          echo "Release created successfully"
