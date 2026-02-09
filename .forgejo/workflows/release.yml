@@ -47,21 +47,24 @@ jobs:
 
           cd chrome-build && zip -r "../dist/humble-steam-check-${{ steps.version.outputs.version }}-chrome.zip" . && cd ..
 
+      - name: Write release notes
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          cat > dist/release-notes.md << 'NOTES'
+          ## Installation
+
+          ### Firefox
+          Download the firefox zip and install from AMO or load temporarily via about:debugging
+
+          ### Chrome
+          Download the chrome zip, unzip, open chrome://extensions, enable Developer Mode, click Load unpacked and select the folder
+          NOTES
+
       - name: Create Forgejo Release
         uses: actions/forgejo-release@v2
         with:
           direction: upload
           token: ${{ secrets.GITHUB_TOKEN }}
           release-dir: dist
+          release-notes-file: dist/release-notes.md
           title: "Humble Steam Check v${{ steps.version.outputs.version }}"
-          release-notes: |
-            ## Installation
-
-            ### Firefox
-            1. Download `humble-steam-check-${{ steps.version.outputs.version }}-firefox.zip`
-            2. Install from AMO or load temporarily via `about:debugging`
-
-            ### Chrome
-            1. Download `humble-steam-check-${{ steps.version.outputs.version }}-chrome.zip`
-            2. Unzip, open `chrome://extensions`, enable Developer Mode
-            3. Click "Load unpacked" and select the folder
