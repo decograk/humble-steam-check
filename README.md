@@ -43,6 +43,14 @@ When you browse a Humble Bundle page, the extension marks each game with a badge
 
 Install from [addons.mozilla.org](https://addons.mozilla.org/en-US/firefox/addon/humble-steam-check/).
 
+### Chrome (from source)
+1. Download the Chrome zip from the [latest release](https://git.deco.sh/signal-works/humble-steam-check/releases)
+2. Unzip it
+3. Open `chrome://extensions` and enable **Developer Mode**
+4. Click **"Load unpacked"** and select the unzipped folder
+
+Chrome Web Store submission is planned after AMO approval.
+
 ## Important Notes
 
 - **DLC detection is limited.** Steam's API doesn't report individual DLC ownership. DLC items show "⊕ Base Owned" if you own the parent game, but you may already own the DLC too — we just can't confirm it.
