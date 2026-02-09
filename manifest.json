@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Humble Steam Check",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Shows which Humble Bundle games are already in your Steam library.",
   "permissions": ["storage"],
   "host_permissions": [
@@ -40,7 +40,10 @@
   "browser_specific_settings": {
     "gecko": {
       "id": "humble-steam-check@deco.sh",
-      "strict_min_version": "109.0"
+      "strict_min_version": "112.0",
+      "data_collection_permissions": {
+        "required": false
+      }
     }
   }
 }
