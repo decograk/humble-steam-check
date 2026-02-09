@@ -1,0 +1,67 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get version from tag
+        id: version
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
+
+      - name: Build Firefox extension (zip)
+        run: |
+          mkdir -p dist
+          zip -r "dist/humble-steam-check-${{ steps.version.outputs.version }}-firefox.zip" \
+            manifest.json background.js content.js matcher.js \
+            popup.html popup.js styles.css icons/ \
+            LICENSE
+
+      - name: Build Chrome extension (zip)
+        run: |
+          mkdir -p chrome-build
+          cp manifest.json background.js content.js matcher.js \
+            popup.html popup.js styles.css LICENSE chrome-build/
+          cp -r icons chrome-build/
+
+          cd chrome-build
+          python3 -c "
+          import json
+          with open('manifest.json') as f:
+              m = json.load(f)
+          m.pop('browser_specific_settings', None)
+          m['background'] = {'service_worker': 'background.js', 'type': 'module'}
+          with open('manifest.json', 'w') as f:
+              json.dump(m, f, indent=2)
+          "
+
+          sed -i 's/browser\.runtime/chrome.runtime/g; s/browser\.storage/chrome.storage/g' \
+            background.js content.js popup.js
+          cd ..
+
+          cd chrome-build && zip -r "../dist/humble-steam-check-${{ steps.version.outputs.version }}-chrome.zip" . && cd ..
+
+      - name: Create Forgejo Release
+        uses: actions/forgejo-release@v2
+        with:
+          direction: upload
+          token: ${{ secrets.GITHUB_TOKEN }}
+          release-dir: dist
+          title: "Humble Steam Check v${{ steps.version.outputs.version }}"
+          release-notes: |
+            ## Installation
+
+            ### Firefox
+            1. Download `humble-steam-check-${{ steps.version.outputs.version }}-firefox.zip`
+            2. Install from AMO or load temporarily via `about:debugging`
+
+            ### Chrome
+            1. Download `humble-steam-check-${{ steps.version.outputs.version }}-chrome.zip`
+            2. Unzip, open `chrome://extensions`, enable Developer Mode
+            3. Click "Load unpacked" and select the folder
