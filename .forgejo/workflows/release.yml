@@ -20,14 +20,14 @@ jobs:
           mkdir -p dist
           zip -r "dist/humble-steam-check-${{ steps.version.outputs.version }}-firefox.zip" \
             manifest.json background.js content.js matcher.js \
-            popup.html popup.js styles.css icons/ \
+            popup.html popup.js popup.css styles.css icons/ \
             LICENSE
 
       - name: Build Chrome extension (zip)
         run: |
           mkdir -p chrome-build
           cp manifest.json background.js content.js matcher.js \
-            popup.html popup.js styles.css LICENSE chrome-build/
+            popup.html popup.js popup.css styles.css LICENSE chrome-build/
           cp -r icons chrome-build/
 
           cd chrome-build
