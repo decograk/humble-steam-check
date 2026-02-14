@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Humble Steam Check",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Shows which Humble Bundle games are already in your Steam library.",
   "permissions": ["storage"],
   "host_permissions": [
