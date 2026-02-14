@@ -135,27 +135,21 @@ jobs:
           cd dist
           unzip -o "humble-steam-check-${VERSION}-firefox.zip" -d firefox-src
           cd firefox-src
-          # Create AMO metadata with changelog
-          CHANGELOG=$(cat /tmp/changelog.txt | sed 's/"/\\"/g' | tr '\n' ' ')
-          cat > amo-metadata.json << METAEOF
-{
-  "version": {
-    "release_notes": {
-      "en-US": "${CHANGELOG}"
-    }
-  }
-}
-METAEOF
+          python3 -c "
+          import json
+          notes = open('/tmp/changelog.txt').read().strip()
+          meta = {'version': {'release_notes': {'en-US': notes}}}
+          json.dump(meta, open('amo-metadata.json', 'w'), indent=2)
+          "
 
-          # Build source code archive for AMO review
           cd ..
           git archive --format=zip --prefix=source/ HEAD -o dist/source.zip
           cd dist/firefox-src
-          
+
           web-ext sign \
             --channel=listed \
             --api-key="$AMO_JWT_ISSUER" \
             --api-secret="$AMO_JWT_SECRET" \
-            --amo-metadata=../amo-metadata.json \
+            --amo-metadata=amo-metadata.json \
             --upload-source-code=../source.zip \
             || echo "AMO submission completed (may need manual review)"
