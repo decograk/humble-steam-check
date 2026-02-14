@@ -58,21 +58,35 @@ jobs:
           REPO="signal-works/humble-steam-check"
           TAG="v${VERSION}"
 
-          # Create release
-          RELEASE_JSON=$(curl -s -X POST \
+          # Check if release already exists for this tag
+          EXISTING=$(curl -s \
             -H "Authorization: token ${TOKEN}" \
-            -H "Content-Type: application/json" \
-            "${FORGEJO}/api/v1/repos/${REPO}/releases" \
-            -d "{\"tag_name\":\"${TAG}\",\"name\":\"Humble Steam Check v${VERSION}\",\"body\":\"## Installation\\n\\n### Firefox\\nDownload the firefox zip and install from AMO or load temporarily via about:debugging\\n\\n### Chrome\\nDownload the chrome zip, unzip, open chrome://extensions, enable Developer Mode, click Load unpacked and select the folder\"}")
+            "${FORGEJO}/api/v1/repos/${REPO}/releases/tags/${TAG}")
+          RELEASE_ID=$(echo "$EXISTING" | jq -r '.id // empty')
 
-          RELEASE_ID=$(echo "$RELEASE_JSON" | jq -r '.id')
-          echo "Release ID: $RELEASE_ID"
+          if [ -n "$RELEASE_ID" ] && [ "$RELEASE_ID" != "null" ]; then
+            echo "Release already exists (ID: $RELEASE_ID), deleting old assets..."
+            for asset_id in $(echo "$EXISTING" | jq -r '.assets[]?.id // empty'); do
+              curl -s -X DELETE \
+                -H "Authorization: token ${TOKEN}" \
+                "${FORGEJO}/api/v1/repos/${REPO}/releases/${RELEASE_ID}/assets/${asset_id}"
+            done
+          else
+            echo "Creating new release..."
+            RELEASE_JSON=$(curl -s -X POST \
+              -H "Authorization: token ${TOKEN}" \
+              -H "Content-Type: application/json" \
+              "${FORGEJO}/api/v1/repos/${REPO}/releases" \
+              -d "{\"tag_name\":\"${TAG}\",\"target_commitish\":\"main\",\"name\":\"Humble Steam Check v${VERSION}\",\"body\":\"## Installation\\n\\n### Firefox\\nDownload the firefox zip and install from AMO or load temporarily via about:debugging\\n\\n### Chrome\\nDownload the chrome zip, unzip, open chrome://extensions, enable Developer Mode, click Load unpacked and select the folder\"}")
 
-          if [ "$RELEASE_ID" = "null" ] || [ -z "$RELEASE_ID" ]; then
-            echo "Failed to create release:"
-            echo "$RELEASE_JSON"
-            exit 1
+            RELEASE_ID=$(echo "$RELEASE_JSON" | jq -r '.id')
+            if [ "$RELEASE_ID" = "null" ] || [ -z "$RELEASE_ID" ]; then
+              echo "Failed to create release:"
+              echo "$RELEASE_JSON"
+              exit 1
+            fi
           fi
+          echo "Release ID: $RELEASE_ID"
 
           # Upload assets
           for file in dist/*.zip; do
