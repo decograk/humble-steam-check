@@ -17,6 +17,29 @@ jobs:
         id: version
         run: echo "version=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
 
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Get previous tag
+          PREV_TAG=$(git tag --sort=-creatordate | head -2 | tail -1)
+          CURR_TAG=${GITHUB_REF#refs/tags/}
+          
+          if [ "$PREV_TAG" = "$CURR_TAG" ]; then
+            # First release
+            CHANGES="Initial release"
+          else
+            CHANGES=$(git log --pretty=format:"- %s" "$PREV_TAG..$CURR_TAG" -- . ':!.forgejo' | grep -v "^- ci:" | grep -v "^- Merge" | head -20)
+          fi
+          
+          if [ -z "$CHANGES" ]; then
+            CHANGES="Bug fixes and improvements"
+          fi
+          
+          # Write to file for AMO and release body
+          echo "$CHANGES" > /tmp/changelog.txt
+          echo "Changelog:"
+          cat /tmp/changelog.txt
+
       - name: Build Firefox extension (zip)
         run: |
           mkdir -p dist
@@ -77,7 +100,7 @@ jobs:
               -H "Authorization: token ${TOKEN}" \
               -H "Content-Type: application/json" \
               "${FORGEJO}/api/v1/repos/${REPO}/releases" \
-              -d "{\"tag_name\":\"${TAG}\",\"target_commitish\":\"main\",\"name\":\"Humble Steam Check v${VERSION}\",\"body\":\"## Installation\\n\\n### Firefox\\nDownload the firefox zip and install from AMO or load temporarily via about:debugging\\n\\n### Chrome\\nDownload the chrome zip, unzip, open chrome://extensions, enable Developer Mode, click Load unpacked and select the folder\"}")
+              -d "{\"tag_name\":\"${TAG}\",\"target_commitish\":\"main\",\"name\":\"Humble Steam Check v${VERSION}\",\"body\":\"## Changes\\n\\n$(cat /tmp/changelog.txt | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')\\n\\n## Installation\\n\\n### Firefox\\nInstall from [AMO](https://addons.mozilla.org/addon/humble-steam-check/) or download the firefox zip\\n\\n### Chrome\\nDownload the chrome zip, unzip, open chrome://extensions, enable Developer Mode, click Load unpacked and select the folder\"}")
 
             RELEASE_ID=$(echo "$RELEASE_JSON" | jq -r '.id')
             if [ "$RELEASE_ID" = "null" ] || [ -z "$RELEASE_ID" ]; then
@@ -112,9 +135,20 @@ jobs:
           cd dist
           unzip -o "humble-steam-check-${VERSION}-firefox.zip" -d firefox-src
           cd firefox-src
+          # Create AMO metadata with changelog
+          cat > amo-metadata.json << METAEOF
+          {
+            "version": {
+              "release_notes": {
+                "en-US": "$(cat /tmp/changelog.txt | sed 's/"/\\"/g' | tr '\n' ' ')"
+              }
+            }
+          }
+          METAEOF
+          
           web-ext sign \
             --channel=listed \
             --api-key="$AMO_JWT_ISSUER" \
             --api-secret="$AMO_JWT_SECRET" \
-            --upload-source-code="../humble-steam-check-${VERSION}-firefox.zip" \
+            --amo-metadata=amo-metadata.json \
             || echo "AMO submission completed (may need manual review)"
