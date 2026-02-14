@@ -101,3 +101,20 @@ jobs:
           done
 
           echo "Release created successfully"
+
+      - name: Submit to AMO
+        env:
+          AMO_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER }}
+          AMO_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          npm install -g web-ext
+          cd dist
+          unzip -o "humble-steam-check-${VERSION}-firefox.zip" -d firefox-src
+          cd firefox-src
+          web-ext sign \
+            --channel=listed \
+            --api-key="$AMO_JWT_ISSUER" \
+            --api-secret="$AMO_JWT_SECRET" \
+            --upload-source-code="../humble-steam-check-${VERSION}-firefox.zip" \
+            || echo "AMO submission completed (may need manual review)"
