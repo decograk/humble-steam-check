@@ -2,78 +2,10 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'">
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      width: 360px;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      font-size: 14px;
-      color: #e0e0e0;
-      background: #1a1a2e;
-      padding: 16px;
-    }
-    h1 {
-      font-size: 16px;
-      margin-bottom: 12px;
-      color: #fff;
-    }
-    .status {
-      padding: 8px 12px;
-      border-radius: 6px;
-      margin-bottom: 12px;
-      font-size: 13px;
-    }
-    .status--ok { background: #1b4332; color: #95d5b2; }
-    .status--error { background: #3d0000; color: #ff6b6b; }
-    .status--setup { background: #2a2a4a; color: #b8b8d0; }
-    label {
-      display: block;
-      font-size: 12px;
-      color: #888;
-      margin-bottom: 4px;
-      margin-top: 12px;
-    }
-    input {
-      width: 100%;
-      padding: 8px 10px;
-      border: 1px solid #333;
-      border-radius: 4px;
-      background: #16213e;
-      color: #e0e0e0;
-      font-size: 13px;
-    }
-    input:focus { border-color: #5865f2; outline: none; }
-    button {
-      width: 100%;
-      padding: 10px;
-      border: none;
-      border-radius: 6px;
-      font-size: 14px;
-      cursor: pointer;
-      margin-top: 12px;
-      font-weight: 600;
-    }
-    .btn-save { background: #5865f2; color: #fff; }
-    .btn-save:hover { background: #4752c4; }
-    .btn-refresh { background: #2a2a4a; color: #b8b8d0; margin-top: 8px; }
-    .btn-refresh:hover { background: #3a3a5a; }
-    .help {
-      margin-top: 16px;
-      padding-top: 12px;
-      border-top: 1px solid #2a2a4a;
-      font-size: 12px;
-      color: #666;
-      line-height: 1.5;
-    }
-    .help a { color: #5865f2; text-decoration: none; }
-    .help a:hover { text-decoration: underline; }
-    .help ol { padding-left: 18px; margin-top: 6px; }
-    .help li { margin-bottom: 4px; }
-    .stats { font-size: 12px; color: #888; margin-top: 8px; }
-  </style>
+  <link rel="stylesheet" href="popup.css">
 </head>
 <body>
+<div class="container">
   <h1>🎮 Humble Steam Check</h1>
 
   <div id="status" class="status status--setup">Loading...</div>
@@ -100,6 +32,7 @@
     <p style="margin-top: 8px;"><strong>Note:</strong> Steam's API doesn't report individual DLC ownership. DLC items show <em>"⊕ Base Owned"</em> if you own the parent game, but you may already have the DLC too — we just can't confirm it.</p>
   </div>
 
+  </div>
   <script src="popup.js"></script>
 </body>
 </html>
