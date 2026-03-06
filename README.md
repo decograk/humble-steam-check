@@ -1,7 +1,9 @@
 # <img src="icons/icon-readme.png" height="32" alt="icon"> Humble Steam Check
 
-A Firefox extension that shows which games on Humble Bundle pages are already in your Steam library.
+A browser extension that shows which games on Humble Bundle pages are already in your Steam library.
 
+[![Chrome Web Store](https://img.shields.io/badge/Chrome-Install%20from%20CWS-blue?logo=googlechrome)](https://chromewebstore.google.com/detail/humble-steam-check/mpoaioehejigoijphfcnoejfpgkjdlpk)
+[![Firefox Add-ons](https://img.shields.io/badge/Firefox-Install%20from%20AMO-orange?logo=firefox)](https://addons.mozilla.org/en-US/firefox/addon/humble-steam-check/)
 ![Badge example](https://img.shields.io/badge/status-beta-blue)
 
 ## What It Does
@@ -43,13 +45,16 @@ When you browse a Humble Bundle page, the extension marks each game with a badge
 
 Install from [addons.mozilla.org](https://addons.mozilla.org/en-US/firefox/addon/humble-steam-check/).
 
+### Chrome Web Store
+[![Chrome Web Store](https://img.shields.io/badge/Chrome-Install%20from%20CWS-blue?logo=googlechrome)](https://chromewebstore.google.com/detail/humble-steam-check/mpoaioehejigoijphfcnoejfpgkjdlpk)
+
+Install from the [Chrome Web Store](https://chromewebstore.google.com/detail/humble-steam-check/mpoaioehejigoijphfcnoejfpgkjdlpk).
+
 ### Chrome (from source)
 1. Download the Chrome zip from the [latest release](https://git.deco.sh/signal-works/humble-steam-check/releases)
 2. Unzip it
 3. Open `chrome://extensions` and enable **Developer Mode**
 4. Click **"Load unpacked"** and select the unzipped folder
-
-Chrome Web Store submission is planned after AMO approval.
 
 ## Important Notes
 
